@@ -1,19 +1,17 @@
 package repositories
 
-
 import (
 	"rental-app/models"
+
 	"gorm.io/gorm"
 )
 
 type RentalRepository interface {
-	GetAllRentals(db *gorm.DB) ([]models.Rental, error)
-	GetRentalByID(db *gorm.DB, id int) (models.Rental, error)
-	CreateRental(db *gorm.DB, rental models.Rental) (models.Rental, error)
-	UpdateRental(db *gorm.DB, rental models.Rental) (models.Rental, error)
-	DeleteRental(db *gorm.DB, id int) error
+	GetAllRentals() ([]models.Rental, error)
+	GetRentalByID(id int) (models.Rental, error)
+	CreateRental(rental models.Rental) (models.Rental, error)
+	UpdateRental(rental models.Rental) (models.Rental, error)
 }
-
 
 type rentalRepository struct {
 	db *gorm.DB
@@ -23,39 +21,68 @@ func NewRentalRepository(db *gorm.DB) RentalRepository {
 	return &rentalRepository{db: db}
 }
 
-func (r *rentalRepository) GetAllRentals(db *gorm.DB) ([]models.Rental, error) {
+func (r *rentalRepository) GetAllRentals() ([]models.Rental, error) {
 	var rentals []models.Rental
-	if err := db.Find(&rentals).Error; err != nil {
+	if err := r.db.Preload("RentalDetails").Find(&rentals).Error; err != nil {
 		return nil, err
 	}
 	return rentals, nil
 }
 
-func (r *rentalRepository) GetRentalByID(db *gorm.DB, id int) (models.Rental, error) {
+func (r *rentalRepository) GetRentalByID(id int) (models.Rental, error) {
 	var rental models.Rental
-	if err := db.First(&rental, id).Error; err != nil {
+	if err := r.db.Preload("RentalDetails").First(&rental, id).Error; err != nil {
 		return models.Rental{}, err
 	}
 	return rental, nil
 }
 
-func (r *rentalRepository) CreateRental(db *gorm.DB, rental models.Rental) (models.Rental, error) {
-	if err := db.Create(&rental).Error; err != nil {
+func (r *rentalRepository) CreateRental(rental models.Rental) (models.Rental, error) {
+	trx := r.db.Begin()
+
+	if err := trx.Create(&rental).Error; err != nil {
+		trx.Rollback()
 		return models.Rental{}, err
 	}
+
+	for i := range rental.RentalDetails {
+		rental.RentalDetails[i].RentalID = rental.ID
+	}
+
+	if err := trx.Create(&rental.RentalDetails).Error; err != nil {
+		trx.Rollback()
+		return models.Rental{}, err
+	}
+
+	trx.Commit()
 	return rental, nil
 }
 
-func (r *rentalRepository) UpdateRental(db *gorm.DB, rental models.Rental) (models.Rental, error) {
-	if err := db.Save(&rental).Error; err != nil {
+func (r *rentalRepository) UpdateRental(rental models.Rental) (models.Rental, error) {
+	trx := r.db.Begin()
+
+	if err := trx.Model(&models.Rental{}).Where("id = ?", rental.ID).Updates(rental).Error; err != nil {
+		trx.Rollback()
 		return models.Rental{}, err
 	}
-	return rental, nil
-}
 
-func (r *rentalRepository) DeleteRental(db *gorm.DB, id int) error {
-	if err := db.Delete(&models.Rental{}, id).Error; err != nil {
-		return err
+	if len(rental.RentalDetails) > 0 {
+		if err := trx.Delete(&models.RentalDetail{}, "rental_id = ?", rental.ID).Error; err != nil {
+			trx.Rollback()
+			return models.Rental{}, err
+		}
+
+		for i := range rental.RentalDetails {
+			rental.RentalDetails[i].RentalID = rental.ID
+		}
+
+		if err := trx.Create(&rental.RentalDetails).Error; err != nil {
+			trx.Rollback()
+			return models.Rental{}, err
+		}
+
 	}
-	return nil
+
+	trx.Commit()
+	return rental, nil
 }

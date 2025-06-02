@@ -2,13 +2,12 @@ package models
 
 import "time"
 
-
 type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int       `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name      string    `gorm:"type:varchar(100);not null" json:"name"`
+	Email     string    `gorm:"type:varchar(100);not null" json:"email"`
+	Password  string    `gorm:"type:text;not null" json:"password"`
+	Role      string    `gorm:"type:enum('admin', 'user');not null;default:user" json:"role"`
+	CreatedAt time.Time `gorm:"not null" json:"created_at"`
+	UpdatedAt time.Time `gorm:"not null" json:"updated_at"`
 }
