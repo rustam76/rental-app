@@ -9,5 +9,5 @@ func main() {
 	config.ConnectDB()
 	r := routes.SetupRouter(config.DB)
 	config.RunMigration()
-	r.Run(":8080")
+	r.Run(":8070")
 }

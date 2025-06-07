@@ -2,7 +2,6 @@ package routes
 
 import (
 	"rental-app/controllers"
-	"rental-app/middleware"
 	"rental-app/repositories"
 	"rental-app/services"
 
@@ -21,10 +20,16 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	items := r.Group("/items")
 	{
 		items.GET("/", itemController.GetAllItems)
-		items.POST("/", middleware.AuthMiddleware(), itemController.CreateItem)
+		items.POST("/",
+			//  middleware.AuthMiddleware(),
+			itemController.CreateItem)
 		items.GET("/:id", itemController.GetItemByID)
-		items.PUT("/:id", middleware.AuthMiddleware(), itemController.UpdateItem)
-		items.DELETE("/:id", middleware.AuthMiddleware(), itemController.DeleteItem)
+		items.PUT("/:id",
+			// middleware.AuthMiddleware(),
+			itemController.UpdateItem)
+		items.DELETE("/:id",
+			//  middleware.AuthMiddleware(),
+			itemController.DeleteItem)
 	}
 
 	// rental
@@ -32,7 +37,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	rentalService := services.NewRentalService(rentalRepository)
 	renralController := controllers.NewRentalController(rentalService)
 	rental := r.Group("/rental")
-	rental.Use(middleware.AuthMiddleware())
+	// rental.Use(middleware.AuthMiddleware())
 	{
 		rental.POST("/", renralController.CreateRental)
 		rental.GET("/", renralController.GetAllRentals)
@@ -46,7 +51,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	userController := controllers.NewUsersController(userService)
 
 	users := r.Group("/users")
-	users.Use(middleware.AuthMiddleware())
+	// users.Use(middleware.AuthMiddleware())
 	{
 		users.GET("/", userController.GetAllUsers)
 		users.POST("/", userController.CreateUser)

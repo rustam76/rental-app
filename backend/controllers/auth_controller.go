@@ -24,20 +24,19 @@ func (ctrl *AuthController) LoginUser(c *gin.Context) {
 		return
 	}
 
-	user, err := ctrl.service.LoginUser(user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	
+	// user, err := ctrl.service.LoginUser(user)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
-	token, err := ctrl.service.GetUserByEmail(user.Email)
-	tokenString, err := utils.GenerateToken(token)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	// token, err := ctrl.service.GetUserByEmail(user.Email)
+	// tokenString, err := utils.GenerateToken(token)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
+	// c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
 func (ctrl *AuthController) RegisterUser(c *gin.Context) {

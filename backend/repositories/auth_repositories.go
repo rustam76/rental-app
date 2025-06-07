@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"rental-app/models"
-	"rental-app/utils"
 
 	"gorm.io/gorm"
 )
@@ -29,11 +28,11 @@ func (r *authRepository) CheckUser(email, password string) (models.User, error) 
 	}
 
 	// check password hash
-	err != utils.ComparePassword(user.Password, password)
+	// err != utils.ComparePassword(user.Password, password)
 
-	if err != nil {
-		return models.User{}, err
-	}
+	// if err != nil {
+	// 	return models.User{}, err
+	// }
 
 	if err := r.db.Where("email = ? AND password = ?", email, password).First(&user).Error; err != nil {
 		return models.User{}, err

@@ -1,0 +1,47 @@
+# Direktori build
+/bin/
+/obj/
+out/
+build/
+
+# File binary hasil build
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Modul Go dan cache
+/vendor/
+*.mod
+*.sum
+go.sum
+.gopath/
+
+# Cache dan metadata tools Go
+/.idea/
+/*.iml
+.DS_Store
+*.swp
+*~
+
+# Log dan file runtime
+*.log
+*.lock
+
+# Direktori testing
+/test-results/
+/coverage.out
+
+# File sementara editor/IDE
+.vscode/
+.idea/
+*.tmp
+*.backup
+*.swp
+*.swo
+
+# OS file
+Thumbs.db
+desktop.ini
+.env
